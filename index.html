@@ -33,13 +33,12 @@
             'oki', 'high', 'school', 'type', 'homework',
             'leader', 'lose', 'time', 'letter', 'world',
             'snow', 'snowman', 'university', 'happy', 'heart',
-			'coffee', 'letter', 'clock', 'heritage'
+			'coffee', 'letter', 'clock', 'heritage', 	
+			'I love to eat cake', 'It is very cold', 'I do not like doing tests',
+			'I have finished my project'
         ];
 		
-	      const sentences = [
-		    'I love to eat cake', 'It is very cold', 'I do not like doing tests',
-			'I have finished my project'
-		  ];
+
 
         const gameContainer = document.getElementById('game-container');
         const wordInput = document.getElementById('word-input');
@@ -68,21 +67,6 @@
 
             gameContainer.appendChild(wordElement);
             activeWords.push(wordElement);
-        }
-		
-		function createSentence() {
-            if (!gameActive) return;
-
-			const sentence = sentences[Math.floor(Math.random() * sentences.length)];
-			const sentenceElement = document.createElement('div');
-            sentenceElement.className = 'sentence';
-            SentenceElement.textContent = sentence;
-            SentenceElement.style.left = `${Math.random() * (gameContainer.offsetWidth - 200)}px`;
-            SentenceElement.style.top = '0px';
-            SentenceElement.dataset.sentence = sentence;
-
-            gameContainer.appendChild(SentenceElement);
-            activeWords.push(SentenceElement);
         }
 
         function updateGame() {
