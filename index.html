@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Club Game: Typing Terror</title>
+	<link rel="stylesheet" href="css/style.css">
+    <style>
+
+    </style>
+</head>
+<body>
+    <div class="game-container">
+	        <div id="colour">
+             <h1>English Club Game: Spelling Terror</h1>  </div> 
+    </div>
+    <div id="game-container">
+        <div id="hud">
+            <div>Score: <span id="score">0</span></div>
+            <div>Lives: <span id="lives">3</span></div>
+        </div>
+        <div id="input-container">
+            <input type="text" id="word-input" autofocus>
+        </div>
+        <div id="game-over" class="game-over">
+            Game Over!<br>
+            Final Score: <span id="final-score">0</span>
+        </div>
+    </div>
+	<script>
+	      const words = [
+            'english', 'club', 'those', 'they', 'time',
+            'oki', 'high', 'school', 'type', 'homework',
+            'leader', 'lose', 'time', 'letter', 'world',
+            'snow', 'snowman', 'university', 'happy', 'heart',
+			'coffee', 'letter', 'clock', 'heritage'
+        ];
+		
+	      const sentences = [
+		    'I love to eat cake', 'It is very cold', 'I do not like doing tests',
+			'I have finished my project'
+		  ];
+
+        const gameContainer = document.getElementById('game-container');
+        const wordInput = document.getElementById('word-input');
+        const scoreElement = document.getElementById('score');
+        const livesElement = document.getElementById('lives');
+        const gameOverElement = document.getElementById('game-over');
+        const finalScoreElement = document.getElementById('final-score');
+
+        let activeWords = [];
+        let score = 0;
+        let lives = 3;
+        let gameSpeed = 2;
+        let gameActive = true;
+        let spawnRate = 2000;
+
+        function createWord() {
+            if (!gameActive) return;
+
+            const word = words[Math.floor(Math.random() * words.length)];
+            const wordElement = document.createElement('div');
+            wordElement.className = 'word';
+            wordElement.textContent = word;
+            wordElement.style.left = `${Math.random() * (gameContainer.offsetWidth - 200)}px`;
+            wordElement.style.top = '0px';
+            wordElement.dataset.word = word;
+
+            gameContainer.appendChild(wordElement);
+            activeWords.push(wordElement);
+        }
+		
+		function createSentence() {
+            if (!gameActive) return;
+
+			const sentence = sentences[Math.floor(Math.random() * sentences.length)];
+			const sentenceElement = document.createElement('div');
+            sentenceElement.className = 'sentence';
+            SentenceElement.textContent = sentence;
+            SentenceElement.style.left = `${Math.random() * (gameContainer.offsetWidth - 200)}px`;
+            SentenceElement.style.top = '0px';
+            SentenceElement.dataset.sentence = sentence;
+
+            gameContainer.appendChild(SentenceElement);
+            activeWords.push(SentenceElement);
+        }
+
+        function updateGame() {
+            if (!gameActive) return;
+
+            for (let i = activeWords.length - 1; i >= 0; i--) {
+                const wordElement = activeWords[i];
+                const currentTop = parseInt(wordElement.style.top) || 0;
+                const newTop = currentTop + gameSpeed;
+                wordElement.style.top = `${newTop}px`;
+
+                if (newTop > gameContainer.offsetHeight) {
+                    wordElement.remove();
+                    activeWords.splice(i, 1);
+                    loseLife();
+                }
+            }
+        }
+
+        function checkInput(input) {
+            const normalizedInput = input.trim().toLowerCase();
+            
+            for (let i = activeWords.length - 1; i >= 0; i--) {
+                const wordElement = activeWords[i];
+                const word = wordElement.dataset.word.toLowerCase();
+                
+                if (word === normalizedInput) {
+                    wordElement.remove();
+                    activeWords.splice(i, 1);
+                    increaseScore(word.length);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function increaseScore(points) {
+            score += points * 10;
+            scoreElement.textContent = score;
+            
+            // Increase difficulty as score increases
+            if (score % 100 === 0) {
+                gameSpeed += 1;
+                spawnRate = Math.max(500, spawnRate - 250);
+            }
+        }
+
+        function loseLife() {
+            lives--;
+            livesElement.textContent = lives;
+            
+            if (lives <= 0) {
+                endGame();
+            }
+        }
+
+        function endGame() {
+            gameActive = false;
+            wordInput.disabled = true;
+            gameOverElement.style.display = 'block';
+            finalScoreElement.textContent = score;
+        }
+
+        wordInput.addEventListener('keyup', (e) => {
+            if (e.key === 'Enter' && gameActive) {
+                if (!checkInput(wordInput.value)) {
+                    // Visual feedback for incorrect input
+                    wordInput.style.backgroundColor = '#ff000033';
+                    setTimeout(() => {
+                        wordInput.style.backgroundColor = '#333';
+                    }, 200);
+                }
+                wordInput.value = '';
+            }
+        });
+
+        // Game loop
+        setInterval(updateGame, 50);
+        setInterval(createWord, spawnRate);
+		setInterval(createSentence, spawnRate);
+
+        // Focus input when clicking anywhere
+        document.body.addEventListener('click', () => {
+            wordInput.focus();
+        });
+		</script>
+</body>
+</html>
