@@ -15,16 +15,19 @@
              <h1>English Club Game: Spelling Terror</h1>  </div> 
     </div>
     <div id="game-container">
+        <div class="glow"></div>
+        <div class="scanline"></div>
         <div id="hud">
-            <div>Score: <span id="score">0</span></div>
-            <div>Lives: <span id="lives">3</span></div>
+            <div><i class="fas fa-trophy"></i> SCORE: <span id="score">0</span></div>
+            <div><i class="fas fa-heart"></i> LIVES: <span id="lives">3</span></div>
         </div>
         <div id="input-container">
-            <input type="text" id="word-input" autofocus>
+            <input type="text" id="word-input" autofocus placeholder="TYPE WORDS HERE...">
         </div>
         <div id="game-over" class="game-over">
-            Game Over!<br>
-            Final Score: <span id="final-score">0</span>
+            SYSTEM FAILURE<br>
+            <span style="font-size: 40px">FINAL SCORE: <span id="final-score">0</span></span><br>
+            <button id="restart-btn">REBOOT SYSTEM</button>
         </div>
     </div>
 	<script>
