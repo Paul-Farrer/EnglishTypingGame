@@ -38,14 +38,13 @@
 			'I have finished my project'
         ];
 		
-
-
         const gameContainer = document.getElementById('game-container');
         const wordInput = document.getElementById('word-input');
         const scoreElement = document.getElementById('score');
         const livesElement = document.getElementById('lives');
         const gameOverElement = document.getElementById('game-over');
         const finalScoreElement = document.getElementById('final-score');
+        const restartBtn = document.getElementById('restart-btn');
 
         let activeWords = [];
         let score = 0;
@@ -54,6 +53,26 @@
         let gameActive = true;
         let spawnRate = 2000;
 
+        function createParticles(x, y, color) {
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = `${x}px`;
+                particle.style.top = `${y}px`;
+                particle.style.width = `${Math.random() * 5 + 2}px`;
+                particle.style.height = particle.style.width;
+                particle.style.backgroundColor = color;
+                
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * 50;
+                particle.style.setProperty('--tx', `${Math.cos(angle) * distance}px`);
+                particle.style.setProperty('--ty', `${Math.sin(angle) * distance}px`);
+                
+                gameContainer.appendChild(particle);
+                setTimeout(() => particle.remove(), 1000);
+            }
+        }
+
         function createWord() {
             if (!gameActive) return;
 
@@ -61,9 +80,12 @@
             const wordElement = document.createElement('div');
             wordElement.className = 'word';
             wordElement.textContent = word;
-            wordElement.style.left = `${Math.random() * (gameContainer.offsetWidth - 200)}px`;
-            wordElement.style.top = '0px';
             wordElement.dataset.word = word;
+            wordElement.dataset.length = word.length;
+            
+            const xPos = Math.random() * (gameContainer.offsetWidth - 200);
+            wordElement.style.left = `${xPos}px`;
+            wordElement.style.top = '-50px';
 
             gameContainer.appendChild(wordElement);
             activeWords.push(wordElement);
@@ -72,18 +94,16 @@
         function updateGame() {
             if (!gameActive) return;
 
-            for (let i = activeWords.length - 1; i >= 0; i--) {
-                const wordElement = activeWords[i];
-                const currentTop = parseInt(wordElement.style.top) || 0;
-                const newTop = currentTop + gameSpeed;
-                wordElement.style.top = `${newTop}px`;
+            activeWords.forEach(word => {
+                const currentTop = parseInt(word.style.top);
+                word.style.top = `${currentTop + gameSpeed}px`;
 
-                if (newTop > gameContainer.offsetHeight) {
-                    wordElement.remove();
-                    activeWords.splice(i, 1);
+                if (currentTop > gameContainer.offsetHeight) {
+                    word.remove();
+                    activeWords = activeWords.filter(w => w !== word);
                     loseLife();
                 }
-            }
+            });
         }
 
         function checkInput(input) {
@@ -94,6 +114,11 @@
                 const word = wordElement.dataset.word.toLowerCase();
                 
                 if (word === normalizedInput) {
+                    createParticles(
+                        wordElement.offsetLeft + wordElement.offsetWidth/2,
+                        wordElement.offsetTop + wordElement.offsetHeight/2,
+                        wordElement.style.color
+                    );
                     wordElement.remove();
                     activeWords.splice(i, 1);
                     increaseScore(word.length);
@@ -104,23 +129,22 @@
         }
 
         function increaseScore(points) {
-            score += points * 10;
+            score += points * 100;
             scoreElement.textContent = score;
             
-            // Increase difficulty as score increases
-            if (score % 100 === 0) {
-                gameSpeed += 1;
-                spawnRate = Math.max(500, spawnRate - 250);
+            if (score % 1000 === 0) {
+                gameSpeed += 0.5;
+                spawnRate = Math.max(750, spawnRate - 150);
+                document.documentElement.style.setProperty('--hue-rotate', `${score/100}deg`);
             }
         }
 
         function loseLife() {
             lives--;
             livesElement.textContent = lives;
+            gameContainer.style.borderColor = `hsl(${lives * 60}, 100%, 50%)`;
             
-            if (lives <= 0) {
-                endGame();
-            }
+            if (lives <= 0) endGame();
         }
 
         function endGame() {
@@ -130,28 +154,44 @@
             finalScoreElement.textContent = score;
         }
 
+        function restartGame() {
+            activeWords.forEach(word => word.remove());
+            activeWords = [];
+            score = 0;
+            lives = 3;
+            gameSpeed = 2;
+            spawnRate = 2000;
+            gameActive = true;
+            scoreElement.textContent = '0';
+            livesElement.textContent = '3';
+            gameOverElement.style.display = 'none';
+            wordInput.disabled = false;
+            wordInput.focus();
+            gameContainer.style.borderColor = '#00f7ff';
+        }
+
         wordInput.addEventListener('keyup', (e) => {
             if (e.key === 'Enter' && gameActive) {
-                if (!checkInput(wordInput.value)) {
-                    // Visual feedback for incorrect input
-                    wordInput.style.backgroundColor = '#ff000033';
+                if (checkInput(wordInput.value)) {
+                    wordInput.style.boxShadow = '0 0 30px rgba(0, 255, 136, 0.3)';
                     setTimeout(() => {
-                        wordInput.style.backgroundColor = '#333';
+                        wordInput.style.boxShadow = '0 0 20px rgba(0, 247, 255, 0.1)';
                     }, 200);
+                } else {
+                    wordInput.style.transform = 'translateX(10px)';
+                    setTimeout(() => {
+                        wordInput.style.transform = 'translateX(0)';
+                    }, 100);
                 }
                 wordInput.value = '';
             }
         });
 
-        // Game loop
+        restartBtn.addEventListener('click', restartGame);
+
         setInterval(updateGame, 50);
         setInterval(createWord, spawnRate);
-		setInterval(createSentence, spawnRate);
-
-        // Focus input when clicking anywhere
-        document.body.addEventListener('click', () => {
-            wordInput.focus();
-        });
+        document.body.addEventListener('click', () => wordInput.focus());
 		</script>
 </body>
 </html>
